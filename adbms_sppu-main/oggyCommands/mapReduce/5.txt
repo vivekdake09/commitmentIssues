@@ -1,69 +1,89 @@
-// Connect to MongoDB and create the database
-use mydb;  // Create or switch to 'mydb' database
+# Start MongoDB service
+sudo systemctl start mongod
 
-// Insert sample data into 'sales' collection
-db.sales.insertMany([
-    { "_id": 1, "item": "apple", "price": 1, "quantity": 100 },
-    { "_id": 2, "item": "banana", "price": 2, "quantity": 150 },
-    { "_id": 3, "item": "orange", "price": 1.5, "quantity": 200 },
-    { "_id": 4, "item": "apple", "price": 1, "quantity": 250 },
-    { "_id": 5, "item": "banana", "price": 2, "quantity": 50 }
-]);
+# Open MongoDB shell
+mongosh
 
-// View inserted data
-db.sales.find().pretty();
+# Step 1: Create a database named 'companyDB'
+use companyDB
 
-// MapReduce Example: Calculate total sales per item
-var mapFunction = function() {
-    emit(this.item, this.price * this.quantity);
-};
+# Step 2: Create a collection named 'employees'
+db.createCollection("employees")
 
-var reduceFunction = function(key, values) {
-    return Array.sum(values);
-};
+# Step 3: Insert sample data into the 'employees' collection
+db.employees.insertMany([
+    { "empId": 1, "name": "Alice", "department": "HR", "salary": 50000, "status": "Active" },
+    { "empId": 2, "name": "Bob", "department": "Finance", "salary": 60000, "status": "Active" },
+    { "empId": 3, "name": "Charlie", "department": "HR", "salary": 55000, "status": "Inactive" },
+    { "empId": 4, "name": "David", "department": "IT", "salary": 70000, "status": "Active" },
+    { "empId": 5, "name": "Eve", "department": "Finance", "salary": 65000, "status": "Inactive" }
+])
 
-// Perform MapReduce and output to 'sales_total' collection
-var result = db.sales.mapReduce(mapFunction, reduceFunction, { out: "sales_total" });
+# Step 4: Aggregation Framework
 
-// View MapReduce result
-db.sales_total.find().pretty();
+## 1. Aggregation - Calculate total salary by department
+db.employees.aggregate([
+    { $group: { _id: "$department", totalSalary: { $sum: "$salary" } } }
+])
 
-// Aggregation Example: Calculate total sales per item
-db.sales.aggregate([
-    { 
-        $group: {
-            _id: "$item", 
-            total_sales: { $sum: { $multiply: ["$price", "$quantity"] } }
-        }
-    }
-]);
+## 2. Aggregation - Count number of active employees
+db.employees.aggregate([
+    { $match: { "status": "Active" } },
+    { $count: "activeEmployees" }
+])
 
-// Indexing Examples
-// Create an index on 'item' field
-db.sales.createIndex({ "item": 1 });
+## 3. Aggregation - Find average salary of active employees in each department
+db.employees.aggregate([
+    { $match: { "status": "Active" } },
+    { $group: { _id: "$department", avgSalary: { $avg: "$salary" } } }
+])
 
-// Create a compound index on 'item' and 'price'
-db.sales.createIndex({ "item": 1, "price": 1 });
+# Step 5: Map-Reduce Implementation
 
-// Create a text index on 'item' field
-db.sales.createIndex({ "item": "text" });
+## Define a map function to emit salary by department
+var mapFunction = function() { emit(this.department, this.salary); };
 
-// View the indexes on the 'sales' collection
-db.sales.getIndexes();
+## Define a reduce function to sum the salaries
+var reduceFunction = function(key, values) { return Array.sum(values); };
 
-// Drop the 'item' index
-db.sales.dropIndex("item_1");
+## Execute map-reduce to calculate total salaries by department
+db.employees.mapReduce(mapFunction, reduceFunction, { out: "totalDepartmentSalary" })
 
-// View indexes after dropping
-db.sales.getIndexes();
+# View map-reduce results
+db.totalDepartmentSalary.find()
 
-// Query without index (slower)
-db.sales.find({ "item": "apple" }).pretty();
+# Step 6: Indexing
 
-// Query with index (faster)
-db.sales.find({ "item": "banana" }).pretty();
+## Create a single-field index on 'department'
+db.employees.createIndex({ "department": 1 })
 
-// Drop the entire database (if needed)
-use mydb;
-db.dropDatabase();
+## Create a compound index on 'department' and 'status'
+db.employees.createIndex({ "department": 1, "status": 1 })
 
+## Create a unique index on 'empId' to prevent duplicate employee entries
+db.employees.createIndex({ "empId": 1 }, { unique: true })
+
+## Create a text index on 'name' to support text search
+db.employees.createIndex({ "name": "text" })
+
+# Step 7: Query with and without Indexes
+
+## Query without index (Slow performance for large datasets)
+db.employees.find({ "department": "Finance", "status": "Active" }).explain("executionStats")
+
+## Query using compound index (Faster performance)
+db.employees.find({ "department": "Finance", "status": "Active" }).explain("executionStats")
+
+# Step 8: Drop Indexes
+
+## Drop the single-field index on 'department'
+db.employees.dropIndex({ "department": 1 })
+
+## Drop the compound index on 'department' and 'status'
+db.employees.dropIndex({ "department": 1, "status": 1 })
+
+## Drop all indexes except the default _id index
+db.employees.dropIndexes()
+
+# View current indexes
+db.employees.getIndexes()
