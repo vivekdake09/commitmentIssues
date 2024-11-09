@@ -1,8 +1,4 @@
-# Start MongoDB service
-sudo systemctl start mongod
 
-# Open MongoDB shell
-mongosh
 
 # Step 1: Create a database named 'salesDB'
 > use salesDB
