@@ -67,4 +67,21 @@ switched to db studentDB
 
 # Null query
 > db.students.find({ "graduated": null })
-{ "_id": ObjectId("..."), "name": "Vivek", "age": 20, "department": "IT", "subjects": ["
+{ "_id": ObjectId("..."), "name": "Vivek", "age": 20, "department": "IT", "subjects": ["Math", "Physics"], "graduated": null }
+
+# Regular expression query
+> db.students.find({ "name": { $regex: "^H" } })
+{ "_id": ObjectId("..."), "name": "Harsh", "age": 22, "department": "IT", "subjects": ["Math", "English"], "graduated": true }
+
+# Querying arrays
+> db.students.find({ "subjects": "Math" })
+{ "_id": ObjectId("..."), "name": "Vivek", "age": 20, "department": "IT", "subjects": ["Math", "Physics"], "graduated": null }
+{ "_id": ObjectId("..."), "name": "Harsh", "age": 22, "department": "IT", "subjects": ["Math", "English"], "graduated": true }
+{ "_id": ObjectId("..."), "name": "Priya", "age": 20, "department": "CS", "subjects": ["Math", "Chemistry"], "graduated": true }
+
+# Type-specific query
+> db.students.find({ "graduated": { $type: "bool" } })
+{ "_id": ObjectId("..."), "name": "Harsh", "age": 22, "department": "IT", "subjects": ["Math", "English"], "graduated": true }
+{ "_id": ObjectId("..."), "name": "Geetesh", "age": 21, "department": "CS", "subjects": ["Chemistry", "Biology"], "graduated": false }
+{ "_id": ObjectId("..."), "name": "Amit", "age": 19, "department": "IT", "subjects": ["Physics", "English"], "graduated": false }
+{ "_id": ObjectId("..."), "name": "Priya", "age": 20, "department": "CS", "subjects": ["Math", "Chemistry"], "graduated": true }
