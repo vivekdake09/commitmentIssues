@@ -1,200 +1,79 @@
-//FOURTH
+# Start MongoDB service
+sudo systemctl start mongod
 
-test> use mydb;
-switched to db mydb
-mydb> db.createCollection("sales");
-{ ok: 1 }
-mydb> db.sales.find()
+# Open MongoDB shell
+mongosh
 
-mydb> db.sales.insertMany([
-...   { "_id": 1, "product": "A", "amount": 100, "date": new Date("2024-01-01") },
-...   { "_id": 2, "product": "B", "amount": 150, "date": new Date("2024-01-01") },
-...   { "_id": 3, "product": "A", "amount": 200, "date": new Date("2024-01-02") },
-...   { "_id": 4, "product": "C", "amount": 250, "date": new Date("2024-01-02") },
-...   { "_id": 5, "product": "B", "amount": 300, "date": new Date("2024-
-01-03") }
-... ]);
+# Step 1: Create a database named 'salesDB'
+> use salesDB
+switched to db salesDB
+
+# Step 2: Create a collection named 'orders'
+> db.createCollection("orders")
+{ "ok" : 1 }
+
+# Step 3: Insert sample data into the 'orders' collection
+> db.orders.insertMany([
+    { "orderId": 1, "customerName": "John Doe", "product": "Laptop", "quantity": 2, "price": 1000, "status": "Delivered" },
+    { "orderId": 2, "customerName": "Jane Smith", "product": "Smartphone", "quantity": 5, "price": 600, "status": "Pending" },
+    { "orderId": 3, "customerName": "Mike Johnson", "product": "Tablet", "quantity": 3, "price": 300, "status": "Delivered" },
+    { "orderId": 4, "customerName": "Emily Davis", "product": "Laptop", "quantity": 1, "price": 1000, "status": "Shipped" },
+    { "orderId": 5, "customerName": "John Doe", "product": "Smartwatch", "quantity": 2, "price": 200, "status": "Delivered" }
+])
 {
-  acknowledged: true,
-  insertedIds: { '0': 1, '1': 2, '2': 3, '3': 4, '4': 5 }
+    "acknowledged": true,
+    "insertedIds": [ ObjectId("..."), ObjectId("..."), ObjectId("..."), ObjectId("..."), ObjectId("...") ]
 }
-mydb> db.sales.find()
-[
-  {
-    _id: 1,
-    product: 'A',
-    amount: 100,
-    date: ISODate('2024-01-01T00:00:00.000Z')
-  },
-  {
-    _id: 2,
-    product: 'B',
-    amount: 150,
-    date: ISODate('2024-01-01T00:00:00.000Z')
-  },
-  {
-    _id: 3,
-    product: 'A',
-    amount: 200,
-    date: ISODate('2024-01-02T00:00:00.000Z')
-  },
-  {
-    _id: 4,
-    product: 'C',
-    amount: 250,
-    date: ISODate('2024-01-02T00:00:00.000Z')
-  },
-  {
-    _id: 5,
-    product: 'B',
-    amount: 300,
-    date: ISODate('2024-01-03T00:00:00.000Z')
-  }
-]
-mydb> db.sales.aggregate([
-...   { $group: { _id: "$product", total_sales: { $sum: "$amount" } } }
-... ]);
-[
-  { _id: 'B', total_sales: 450 },
-  { _id: 'C', total_sales: 250 },
-  { _id: 'A', total_sales: 300 }
-]
-mydb> db.sales.find()
-[
-  {
-    _id: 1,
-    product: 'A',
-    amount: 100,
-    date: ISODate('2024-01-01T00:00:00.000Z')
-  },
-  {
-    _id: 2,
-    product: 'B',
-    amount: 150,
-    date: ISODate('2024-01-01T00:00:00.000Z')
-  },
-  {
-    _id: 3,
-    product: 'A',
-    amount: 200,
-    date: ISODate('2024-01-02T00:00:00.000Z')
-  },
-  {
-    _id: 4,
-    product: 'C',
-    amount: 250,
-    date: ISODate('2024-01-02T00:00:00.000Z')
-  },
-  {
-    _id: 5,
-    product: 'B',
-    amount: 300,
-    date: ISODate('2024-01-03T00:00:00.000Z')
-  }
-]
-mydb> db.sales.aggregate([
-...   { $match: { amount: { $gt: 150 } } },
-...   { $group: { _id: "$product", total_sales: { $sum: "$amount" } } },
 
-...   { $sort: { total_sales: -1 } }
-... ]);
-[
-  { _id: 'B', total_sales: 300 },
-  { _id: 'C', total_sales: 250 },
-  { _id: 'A', total_sales: 200 }
-]
-mydb> db.sales.find()
-[
-  {
-    _id: 1,
-    product: 'A',
-    amount: 100,
-    date: ISODate('2024-01-01T00:00:00.000Z')
-  },
-  {
-    _id: 2,
-    product: 'B',
-    amount: 150,
-    date: ISODate('2024-01-01T00:00:00.000Z')
-  },
-  {
-    _id: 3,
-    product: 'A',
-    amount: 200,
-    date: ISODate('2024-01-02T00:00:00.000Z')
-  },
-  {
-    _id: 4,
-    product: 'C',
-    amount: 250,
-    date: ISODate('2024-01-02T00:00:00.000Z')
-  },
-  {
-    _id: 5,
-    product: 'B',
-    amount: 300,
-    date: ISODate('2024-01-03T00:00:00.000Z')
-  }
-]
-mydb> var mapFunction = function() {
-...   emit(this.product, this.amount);  // Emit product as key, amount as value
-... };
+# Aggregation - Calculate total revenue for all orders
+> db.orders.aggregate([
+    { $group: { _id: null, totalRevenue: { $sum: { $multiply: ["$quantity", "$price"] } } } }
+])
+{ "_id": null, "totalRevenue": 8300 }
 
-mydb> var reduceFunction = function(key, values) {
-...   return Array.sum(values);  // Sum up the values (sales amount)
-... };
+# Aggregation - Count total number of orders by each customer
+> db.orders.aggregate([
+    { $group: { _id: "$customerName", totalOrders: { $sum: 1 } } }
+])
+{ "_id": "John Doe", "totalOrders": 2 }
+{ "_id": "Jane Smith", "totalOrders": 1 }
+{ "_id": "Mike Johnson", "totalOrders": 1 }
+{ "_id": "Emily Davis", "totalOrders": 1 }
 
-mydb> db.sales.mapReduce(
-...   mapFunction,     // Map function
-...   reduceFunction,  // Reduce function
-...   { out: "total_sales" }  // Output collection
-... );
-DeprecationWarning: Collection.mapReduce() is deprecated. Use an aggregation instead.
-See https://docs.mongodb.com/manual/core/map-reduce for details.
-{ result: 'total_sales', ok: 1 }
-mydb> db.total_sales.find()
+# Aggregation - Average price per product type
+> db.orders.aggregate([
+    { $group: { _id: "$product", avgPrice: { $avg: "$price" } } }
+])
+{ "_id": "Laptop", "avgPrice": 1000 }
+{ "_id": "Smartphone", "avgPrice": 600 }
+{ "_id": "Tablet", "avgPrice": 300 }
+{ "_id": "Smartwatch", "avgPrice": 200 }
+
+# Map-Reduce Implementation
+> var mapFunction = function() { emit(this.product, this.quantity); };
+> var reduceFunction = function(key, values) { return Array.sum(values); };
+> db.orders.mapReduce(mapFunction, reduceFunction, { out: "totalQuantities" })
+{ "result" : "totalQuantities", "ok" : 1 }
+
+# View map-reduce result
+> db.totalQuantities.find()
+{ "_id": "Laptop", "value": 3 }
+{ "_id": "Smartphone", "value": 5 }
+{ "_id": "Tablet", "value": 3 }
+{ "_id": "Smartwatch", "value": 2 }
+
+# Indexing on 'customerName'
+> db.orders.createIndex({ "customerName": 1 })
+{ "createdCollectionAutomatically": false, "numIndexesBefore": 1, "numIndexesAfter": 2, "ok": 1 }
+
+# Verify index
+> db.orders.getIndexes()
 [
-  { _id: 'C', value: 250 },
-  { _id: 'A', value: 300 },
-  { _id: 'B', value: 450 }
+    { "v": 2, "key": { "_id": 1 }, "name": "_id_" },
+    { "v": 2, "key": { "customerName": 1 }, "name": "customerName_1" }
 ]
-mydb> db.sales.createIndex({ product: 1 });
-product_1
-mydb> db.sales.getIndexes()
-[
-  { v: 2, key: { _id: 1 }, name: '_id_' },
-  { v: 2, key: { product: 1 }, name: 'product_1' }
-]
-mydb> db.sales.find()
-[
-  {
-    _id: 1,
-    product: 'A',
-    amount: 100,
-    date: ISODate('2024-01-01T00:00:00.000Z')
-  },
-  {
-    _id: 2,
-    product: 'B',
-    amount: 150,
-    date: ISODate('2024-01-01T00:00:00.000Z')
-  },
-  {
-    _id: 3,
-    product: 'A',
-    amount: 200,
-    date: ISODate('2024-01-02T00:00:00.000Z')
-  },
-  {
-    _id: 4,
-    product: 'C',
-    amount: 250,
-    date: ISODate('2024-01-02T00:00:00.000Z')
-  },
-  {
-    _id: 5,
-    product: 'B',
-    amount: 300,
-    date: ISODate('2024-01-03T00:00:00.000Z')
-  }
-]
+
+# Query using indexed field
+> db.orders.find({ "customerName": "John Doe" })
+{ "_id": ObjectId("..."), "orderId": 1, "customerName": "John Doe", "product": "Laptop" }
+{ "_id": ObjectId("..."), "orderId": 5, "customerName": "John Doe", "product": "Smartwatch" }
