@@ -1,69 +1,61 @@
-mongo 
 
-#Step 1: Create a Database and Collection
+mongos
 
-use CompanyDB
+# 3. Create a new database named "sportsDB"
+use sportsDB
 
-db.createCollection("employees")
+# 4. Create a collection named "players" and insert a single document
+db.players.insertOne({ name: "Virat Kohli", age: 35, sport: "Cricket", team: "India", rank: 1 })
 
-db.employees.find()
 
+db.players.find().pretty()
 
-#Step 2: Inserting and Saving Documents
-(i) Batch Insert with Validation
-
-db.employees.insertMany([
-    { _id: 1, name: "John Doe", age: 28, position: "Software Engineer", salary: 70000 },
-    { _id: 2, name: "Jane Smith", age: 34, position: "Project Manager", salary: 90000 },
-    { _id: 3, name: "Alice Johnson", age: 25, position: "Intern", salary: 30000 }
+# 6. Batch insert multiple documents with validation
+db.players.insertMany([
+  { name: "Lionel Messi", age: 36, sport: "Football", team: "Inter Miami", rank: 1 },
+  { name: "Serena Williams", age: 42, sport: "Tennis", team: "USA", rank: 2 },
+  { name: "LeBron James", age: 39, sport: "Basketball", team: "Lakers", rank: 3 }
 ])
 
-db.employees.find()
 
-# Insert validation example (will throw an error due to duplicate _id)
-db.employees.insertOne({ _id: 1, name: "Mike Brown", age: 30, position: "Analyst", salary: 65000 })
+db.players.find().pretty()
 
-db.employees.find()
+# 8. Remove a document where the name is "Serena Williams"
+db.players.deleteOne({ name: "Serena Williams" })
 
-#Step 3: Removing Documents
 
-db.employees.deleteOne({ name: "Alice Johnson" })
+db.players.find().pretty()
 
-db.employees.deleteMany({ salary: { $lt: 50000 } })
+# 10. Replace a document (document replacement)
+db.players.replaceOne(
+  { name: "LeBron James" },
+  { name: "LeBron James", age: 40, sport: "Basketball", team: "Lakers", rank: 2 }
+)
 
-db.employees.find()
 
-#Step 4: Updating Documents
-#(i) Document Replacement
-# Replace the document with _id: 2
+db.players.find().pretty()
 
-db.employees.replaceOne({ _id: 2 }, { _id: 2, name: "Jane Doe", age: 35, position: "Senior Project Manager", salary: 95000 })
-db.employees.find({ _id: 1 })
+# 12. Update a document using modifiers ($set)
+db.players.updateOne({ name: "Virat Kohli" }, { $set: { rank: 2 } })
 
-#(ii) Using Modifiers
-# Increase the salary of John Doe by 5000
 
-db.employees.updateOne({ name: "John Doe" }, { $inc: { salary: 5000 } })
-db.employees.find()
+db.players.find().pretty()
 
-#Set a new field 'experience' for John Doe
+# 14. Upsert a document (update if exists, insert if not)
+db.players.updateOne(
+  { name: "Cristiano Ronaldo" },
+  { $set: { age: 38, sport: "Football", team: "Al-Nassr", rank: 1 } },
+  { upsert: true }
+)
 
-db.employees.updateOne({ name: "John Doe" }, { $set: { experience: "5 years" } })
 
-#(iii) Upserts (Update or Insert if not exists)
-# Upsert example: If no document with _id: 4 exists, insert it
+db.players.find().pretty()
 
-db.employees.updateOne({ _id: 4 }, { $set: { name: "New Employee", age: 40, position: "Consultant", salary: 80000 } }, { upsert: true })
-db.employees.find()
+# 16. Update multiple documents (increase age by 1 for all players)
+db.players.updateMany({}, { $inc: { age: 1 } })
 
-#(iv) Updating Multiple Documents
-# Increase the salary of all employees with the position "Software Engineer" by 10000
 
-db.employees.updateMany({ position: "Software Engineer" }, { $inc: { salary: 10000 } })
-db.employees.find({ position: "Software Engineer" })
+db.players.find().pretty()
 
-#(v) Returning Updated Documents
-# Find and modify to return the updated document
 
-db.employees.findOneAndUpdate({ name: "John Doe" }, { $set: { position: "Lead Engineer" } }, { returnNewDocument: true })
-db.employees.find({ name: "John Doe" })
+
