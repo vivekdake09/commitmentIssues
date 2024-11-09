@@ -1,80 +1,69 @@
-# Step 1: Create Database and Collection
-use flight_management_system
-db.createCollection("flights")
+# Step 1: Start MongoDB server (if not already running)
+sudo systemctl start mongod
 
-# View changes made after creating the collection
-db.flights.find()
+# Step 2: Access the MongoDB shell
+mongo
 
-# Step 2: Batch Insert Documents
-db.flights.insertMany([
-  { flight_id: "AI101", airline: "Air India", source: "Pune", destination: "Delhi", seats_available: 100, price: 5000 },
-  { flight_id: "6E202", airline: "Indigo", source: "Mumbai", destination: "Chennai", seats_available: 150, price: 4000 },
-  { flight_id: "SG303", airline: "SpiceJet", source: "Bangalore", destination: "Hyderabad", seats_available: 120, price: 3500 }
-])
+# Step 3: Create a database named 'libraryDB'
+use libraryDB
 
-# View changes made after inserting documents
-db.flights.find()
+# Step 4: Create a collection named 'books'
+db.createCollection("books")
 
-# Step 3: $where Query Examples
+# a) Inserting and Saving Document
 
-# Find flights where seats available are greater than 120
-db.flights.find({ $where: "this.seats_available > 120" })
+## Batch insert with insert validation (ordered insert)
+db.books.insertMany(
+    [
+        { "title": "The Great Gatsby", "author": "F. Scott Fitzgerald", "year": 1925, "genres": ["Classic", "Fiction"], "available": true },
+        { "title": "1984", "author": "George Orwell", "year": 1949, "genres": ["Dystopian", "Political Fiction"], "available": false },
+        { "title": "To Kill a Mockingbird", "author": "Harper Lee", "year": 1960, "genres": ["Classic", "Social Issues"], "available": true },
+        { "title": "The Catcher in the Rye", "author": "J.D. Salinger", "year": 1951, "genres": ["Classic", "Fiction"], "available": false },
+        { "title": "Moby-Dick", "author": "Herman Melville", "year": 1851, "genres": ["Adventure", "Classic"], "available": true }
+    ],
+    { ordered: true }
+)
 
-# View data after $where query
-db.flights.find()
+# View all documents in the 'books' collection
+db.books.find()
 
-# Find flights where price is greater than 4000 and seats available are less than 150
-db.flights.find({ $where: "this.price > 4000 && this.seats_available < 150" })
+# b) $where queries
 
-# View data after $where query
-db.flights.find()
+## Example 1: Find books published before the year 1950 using $where
+db.books.find({ $where: "this.year < 1950" })
 
-# Find flights where the airline is Air India and price is greater than 4500
-db.flights.find({ $where: "this.airline === 'Air India' && this.price > 4500" })
+## Example 2: Find books where title length is greater than 15 characters using $where
+db.books.find({ $where: "this.title.length > 15" })
 
-# View data after $where query
-db.flights.find()
+# View the changes
+db.books.find()
 
-# Step 4: Cursor Operations
+# d) Cursors (Limit, Skip, Sort)
 
-# Limit the number of results to 2
-db.flights.find().limit(2)
+## Limit - Retrieve only the first 3 books
+db.books.find().limit(3)
 
-# View data after limit operation
-db.flights.find()
+## Skip - Skip the first 2 books and return the rest
+db.books.find().skip(2)
 
-# Skip 1 document and limit to 2 results
-db.flights.find().skip(1).limit(2)
+## Sort - Sort books by 'year' in descending order
+db.books.find().sort({ "year": -1 })
 
-# View data after skip and limit operation
-db.flights.find()
+## Sort and Limit - Sort by 'title' in ascending order and limit to 2 results
+db.books.find().sort({ "title": 1 }).limit(2)
 
-# Sort documents by price in descending order
-db.flights.find().sort({ price: -1 })
+# Advanced Query Options
 
-# View data after sorting by price
-db.flights.find()
+## Multiple where query: Find books available and published before the year 1960
+db.books.find({ $and: [{ "available": true }, { "year": { $lt: 1960 } }] })
 
-# Sort documents by price in ascending order
-db.flights.find().sort({ price: 1 })
+## Multiple where query: Find books by 'Harper Lee' or 'Herman Melville' that are available
+db.books.find({ $or: [{ "author": "Harper Lee" }, { "author": "Herman Melville" }], "available": true })
 
-# View data after sorting by price (ascending)
-db.flights.find()
+# Cursors with advanced query options
 
-# Find the first document that matches the query and limit it to 1 document
-db.flights.find({ seats_available: { $lt: 130 } }).limit(1)
+## Limit and Sort - Find available books and sort by 'year' descending, limit to 2 results
+db.books.find({ "available": true }).sort({ "year": -1 }).limit(2)
 
-# View data after finding first matching document
-db.flights.find()
-
-# Find flights that are either from Pune or Mumbai (OR query)
-db.flights.find({ $or: [{ source: "Pune" }, { source: "Mumbai" }] })
-
-# View data after OR query
-db.flights.find()
-
-# Skip 1 document, sort by price in descending order, and limit to 2 results
-db.flights.find().skip(1).sort({ price: -1 }).limit(2)
-
-
-db.flights.find()
+## Skip and Limit - Skip first 1 result and limit the output to 3
+db.books.find().skip(1).limit(3)
