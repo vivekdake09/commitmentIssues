@@ -1,545 +1,75 @@
-//THIRD
 
-test> use flight
-switched to db flight
-flight> db.dropDatabase();
-{ ok: 1, dropped: 'flight' }
-flight> db.createCollection("flights")
-{ ok: 1 }
-flight> db.flights.find()
+# Step 3: Create a database named 'libraryDB'
+> use libraryDB
+switched to db libraryDB
 
-flight> db.flights.insertMany([
-...   { flight_id: "AI101", airline: "Air India", source: "Pune", destination: "Delhi", seats_available: 100, price: 5000 },
-...   { flight_id: "6E202", airline: "Indigo", source: "Mumbai", destination: "Chennai", seats_available: 150, price: 4000 },
-...   { flight_id: "SG303", airline: "SpiceJet", source: "Bangalore", destination: "Hyderabad", seats_available: 120, price: 3500 }
-... ])
+# Step 4: Create a collection named 'books'
+> db.createCollection("books")
+{ "ok" : 1 }
+
+# a) Inserting and Saving Document
+
+## Batch insert with insert validation (ordered insert)
+> db.books.insertMany(
+    [
+        { "title": "The Great Gatsby", "author": "F. Scott Fitzgerald", "year": 1925, "genres": ["Classic", "Fiction"], "available": true },
+        { "title": "1984", "author": "George Orwell", "year": 1949, "genres": ["Dystopian", "Political Fiction"], "available": false },
+        { "title": "To Kill a Mockingbird", "author": "Harper Lee", "year": 1960, "genres": ["Classic", "Social Issues"], "available": true },
+        { "title": "The Catcher in the Rye", "author": "J.D. Salinger", "year": 1951, "genres": ["Classic", "Fiction"], "available": false },
+        { "title": "Moby-Dick", "author": "Herman Melville", "year": 1851, "genres": ["Adventure", "Classic"], "available": true }
+    ],
+    { ordered: true }
+)
 {
-  acknowledged: true,
-  insertedIds: {
-    '0': ObjectId('672f99c597509d5920c73bf8'),
-    '1': ObjectId('672f99c597509d5920c73bf9'),
-    '2': ObjectId('672f99c597509d5920c73bfa')
-  }
+    "acknowledged": true,
+    "insertedIds": [
+        ObjectId("..."),
+        ObjectId("..."),
+        ObjectId("..."),
+        ObjectId("..."),
+        ObjectId("...")
+    ]
 }
-flight> db.flights.find()
-[
-  {
-    _id: ObjectId('672f99c597509d5920c73bf8'),
-    flight_id: 'AI101',
-    airline: 'Air India',
-    source: 'Pune',
-    destination: 'Delhi',
-    seats_available: 100,
-    price: 5000
-  },
-  {
-    _id: ObjectId('672f99c597509d5920c73bf9'),
-    flight_id: '6E202',
-    airline: 'Indigo',
-    source: 'Mumbai',
-    destination: 'Chennai',
-    seats_available: 150,
-    price: 4000
-  },
-  {
-    _id: ObjectId('672f99c597509d5920c73bfa'),
-    flight_id: 'SG303',
-    airline: 'SpiceJet',
-    source: 'Bangalore',
-    destination: 'Hyderabad',
-    seats_available: 120,
-    price: 3500
-  }
-]
-flight> db.flights.find({ $where: "this.seats_available > 120" })
-[
-  {
-    _id: ObjectId('672f99c597509d5920c73bf9'),
-    flight_id: '6E202',
-    airline: 'Indigo',
-    source: 'Mumbai',
-    destination: 'Chennai',
-    seats_available: 150,
-    price: 4000
-  }
-]
-flight> db.flights.find()
-[
-  {
-    _id: ObjectId('672f99c597509d5920c73bf8'),
-    flight_id: 'AI101',
-    airline: 'Air India',
-    source: 'Pune',
-    destination: 'Delhi',
-    seats_available: 100,
-    price: 5000
-  },
-  {
-    _id: ObjectId('672f99c597509d5920c73bf9'),
-    flight_id: '6E202',
-    airline: 'Indigo',
-    source: 'Mumbai',
-    destination: 'Chennai',
-    seats_available: 150,
-    price: 4000
-  },
-  {
-    _id: ObjectId('672f99c597509d5920c73bfa'),
-    flight_id: 'SG303',
-    airline: 'SpiceJet',
-    source: 'Bangalore',
-    destination: 'Hyderabad',
-    seats_available: 120,
-    price: 3500
-  }
-]
-flight> db.flights.find({ $where: "this.price > 4000 && this.seats_available < 150" })
-[
-  {
-    _id: ObjectId('672f99c597509d5920c73bf8'),
-    flight_id: 'AI101',
-    airline: 'Air India',
-    source: 'Pune',
-    destination: 'Delhi',
-    seats_available: 100,
-    price: 5000
-  }
-]
-flight> db.flights.find()
-[
-  {
-    _id: ObjectId('672f99c597509d5920c73bf8'),
-    flight_id: 'AI101',
-    airline: 'Air India',
-    source: 'Pune',
-    destination: 'Delhi',
-    seats_available: 100,
-    price: 5000
-  },
-  {
-    _id: ObjectId('672f99c597509d5920c73bf9'),
-    flight_id: '6E202',
-    airline: 'Indigo',
-    source: 'Mumbai',
-    destination: 'Chennai',
-    seats_available: 150,
-    price: 4000
-  },
-  {
-    _id: ObjectId('672f99c597509d5920c73bfa'),
-    flight_id: 'SG303',
-    airline: 'SpiceJet',
-    source: 'Bangalore',
-    destination: 'Hyderabad',
-    seats_available: 120,
-    price: 3500
-  }
-]
-flight> db.flights.find({ $where: "this.airline === 'Air India' && this.price > 4500" })
-[
-  {
-    _id: ObjectId('672f99c597509d5920c73bf8'),
-    flight_id: 'AI101',
-    airline: 'Air India',
-    source: 'Pune',
-    destination: 'Delhi',
-    seats_available: 100,
-    price: 5000
-  }
-]
-flight> db.flights.find()
-[
-  {
-    _id: ObjectId('672f99c597509d5920c73bf8'),
-    flight_id: 'AI101',
-    airline: 'Air India',
-    source: 'Pune',
-    destination: 'Delhi',
-    seats_available: 100,
-    price: 5000
-  },
-  {
-    _id: ObjectId('672f99c597509d5920c73bf9'),
-    flight_id: '6E202',
-    airline: 'Indigo',
-    source: 'Mumbai',
-    destination: 'Chennai',
-    seats_available: 150,
-    price: 4000
-  },
-  {
-    _id: ObjectId('672f99c597509d5920c73bfa'),
-    flight_id: 'SG303',
-    airline: 'SpiceJet',
-    source: 'Bangalore',
-    destination: 'Hyderabad',
-    seats_available: 120,
-    price: 3500
-  }
-]
-flight> db.flights.find().limit(2)
-[
-  {
-    _id: ObjectId('672f99c597509d5920c73bf8'),
-    flight_id: 'AI101',
-    airline: 'Air India',
-    source: 'Pune',
-    destination: 'Delhi',
-    seats_available: 100,
-    price: 5000
-  },
-  {
-    _id: ObjectId('672f99c597509d5920c73bf9'),
-    flight_id: '6E202',
-    airline: 'Indigo',
-    source: 'Mumbai',
-    destination: 'Chennai',
-    seats_available: 150,
-    price: 4000
-  }
-]
-flight> db.flights.find()
-[
-  {
-    _id: ObjectId('672f99c597509d5920c73bf8'),
-    flight_id: 'AI101',
-    airline: 'Air India',
-    source: 'Pune',
-    destination: 'Delhi',
-    seats_available: 100,
-    price: 5000
-  },
-  {
-    _id: ObjectId('672f99c597509d5920c73bf9'),
-    flight_id: '6E202',
-    airline: 'Indigo',
-    source: 'Mumbai',
-    destination: 'Chennai',
-    seats_available: 150,
-    price: 4000
-  },
-  {
-    _id: ObjectId('672f99c597509d5920c73bfa'),
-    flight_id: 'SG303',
-    airline: 'SpiceJet',
-    source: 'Bangalore',
-    destination: 'Hyderabad',
-    seats_available: 120,
-    price: 3500
-  }
-]
-flight> db.flights.find().skip(1).limit(2)
-[
-  {
-    _id: ObjectId('672f99c597509d5920c73bf9'),
-    flight_id: '6E202',
-    airline: 'Indigo',
-    source: 'Mumbai',
-    destination: 'Chennai',
-    seats_available: 150,
-    price: 4000
-  },
-  {
-    _id: ObjectId('672f99c597509d5920c73bfa'),
-    flight_id: 'SG303',
-    airline: 'SpiceJet',
-    source: 'Bangalore',
-    destination: 'Hyderabad',
-    seats_available: 120,
-    price: 3500
-  }
-]
-flight> db.flights.find()
-[
-  {
-    _id: ObjectId('672f99c597509d5920c73bf8'),
-    flight_id: 'AI101',
-    airline: 'Air India',
-    source: 'Pune',
-    destination: 'Delhi',
-    seats_available: 100,
-    price: 5000
-  },
-  {
-    _id: ObjectId('672f99c597509d5920c73bf9'),
-    flight_id: '6E202',
-    airline: 'Indigo',
-    source: 'Mumbai',
-    destination: 'Chennai',
-    seats_available: 150,
-    price: 4000
-  },
-  {
-    _id: ObjectId('672f99c597509d5920c73bfa'),
-    flight_id: 'SG303',
-    airline: 'SpiceJet',
-    source: 'Bangalore',
-    destination: 'Hyderabad',
-    seats_available: 120,
-    price: 3500
-  }
-]
-flight> db.flights.find().sort({ price: -1 })
-[
-  {
-    _id: ObjectId('672f99c597509d5920c73bf8'),
-    flight_id: 'AI101',
-    airline: 'Air India',
-    source: 'Pune',
-    destination: 'Delhi',
-    seats_available: 100,
-    price: 5000
-  },
-  {
-    _id: ObjectId('672f99c597509d5920c73bf9'),
-    flight_id: '6E202',
-    airline: 'Indigo',
-    source: 'Mumbai',
-    destination: 'Chennai',
-    seats_available: 150,
-    price: 4000
-  },
-  {
-    _id: ObjectId('672f99c597509d5920c73bfa'),
-    flight_id: 'SG303',
-    airline: 'SpiceJet',
-    source: 'Bangalore',
-    destination: 'Hyderabad',
-    seats_available: 120,
-    price: 3500
-  }
-]
-flight> db.flights.find()
-[
-  {
-    _id: ObjectId('672f99c597509d5920c73bf8'),
-    flight_id: 'AI101',
-    airline: 'Air India',
-    source: 'Pune',
-    destination: 'Delhi',
-    seats_available: 100,
-    price: 5000
-  },
-  {
-    _id: ObjectId('672f99c597509d5920c73bf9'),
-    flight_id: '6E202',
-    airline: 'Indigo',
-    source: 'Mumbai',
-    destination: 'Chennai',
-    seats_available: 150,
-    price: 4000
-  },
-  {
-    _id: ObjectId('672f99c597509d5920c73bfa'),
-    flight_id: 'SG303',
-    airline: 'SpiceJet',
-    source: 'Bangalore',
-    destination: 'Hyderabad',
-    seats_available: 120,
-    price: 3500
-  }
-]
-flight> db.flights.find().sort({ price: 1 })
-[
-  {
-    _id: ObjectId('672f99c597509d5920c73bfa'),
-    flight_id: 'SG303',
-    airline: 'SpiceJet',
-    source: 'Bangalore',
-    destination: 'Hyderabad',
-    seats_available: 120,
-    price: 3500
-  },
-  {
-    _id: ObjectId('672f99c597509d5920c73bf9'),
-    flight_id: '6E202',
-    airline: 'Indigo',
-    source: 'Mumbai',
-    destination: 'Chennai',
-    seats_available: 150,
-    price: 4000
-  },
-  {
-    _id: ObjectId('672f99c597509d5920c73bf8'),
-    flight_id: 'AI101',
-    airline: 'Air India',
-    source: 'Pune',
-    destination: 'Delhi',
-    seats_available: 100,
-    price: 5000
-  }
-]
-flight> db.flights.find()
-[
-  {
-    _id: ObjectId('672f99c597509d5920c73bf8'),
-    flight_id: 'AI101',
-    airline: 'Air India',
-    source: 'Pune',
-    destination: 'Delhi',
-    seats_available: 100,
-    price: 5000
-  },
-  {
-    _id: ObjectId('672f99c597509d5920c73bf9'),
-    flight_id: '6E202',
-    airline: 'Indigo',
-    source: 'Mumbai',
-    destination: 'Chennai',
-    seats_available: 150,
-    price: 4000
-  },
-  {
-    _id: ObjectId('672f99c597509d5920c73bfa'),
-    flight_id: 'SG303',
-    airline: 'SpiceJet',
-    source: 'Bangalore',
-    destination: 'Hyderabad',
-    seats_available: 120,
-    price: 3500
-  }
-]
-flight> db.flights.find({ seats_available: { $lt: 130 } }).limit(1)
-[
-  {
-    _id: ObjectId('672f99c597509d5920c73bf8'),
-    flight_id: 'AI101',
-    airline: 'Air India',
-    source: 'Pune',
-    destination: 'Delhi',
-    seats_available: 100,
-    price: 5000
-  }
-]
-flight> db.flights.find()
-[
-  {
-    _id: ObjectId('672f99c597509d5920c73bf8'),
-    flight_id: 'AI101',
-    airline: 'Air India',
-    source: 'Pune',
-    destination: 'Delhi',
-    seats_available: 100,
-    price: 5000
-  },
-  {
-    _id: ObjectId('672f99c597509d5920c73bf9'),
-    flight_id: '6E202',
-    airline: 'Indigo',
-    source: 'Mumbai',
-    destination: 'Chennai',
-    seats_available: 150,
-    price: 4000
-  },
-  {
-    _id: ObjectId('672f99c597509d5920c73bfa'),
-    flight_id: 'SG303',
-    airline: 'SpiceJet',
-    source: 'Bangalore',
-    destination: 'Hyderabad',
-    seats_available: 120,
-    price: 3500
-  }
-]
-flight> db.flights.find({ $or: [{ source: "Pune" }, { source: "Mumbai" }] })
-[
-  {
-    _id: ObjectId('672f99c597509d5920c73bf8'),
-    flight_id: 'AI101',
-    airline: 'Air India',
-    source: 'Pune',
-    destination: 'Delhi',
-    seats_available: 100,
-    price: 5000
-  },
-  {
-    _id: ObjectId('672f99c597509d5920c73bf9'),
-    flight_id: '6E202',
-    airline: 'Indigo',
-    source: 'Mumbai',
-    destination: 'Chennai',
-    seats_available: 150,
-    price: 4000
-  }
-]
-flight> db.flights.find()
-[
-  {
-    _id: ObjectId('672f99c597509d5920c73bf8'),
-    flight_id: 'AI101',
-    airline: 'Air India',
-    source: 'Pune',
-    destination: 'Delhi',
-    seats_available: 100,
-    price: 5000
-  },
-  {
-    _id: ObjectId('672f99c597509d5920c73bf9'),
-    flight_id: '6E202',
-    airline: 'Indigo',
-    source: 'Mumbai',
-    destination: 'Chennai',
-    seats_available: 150,
-    price: 4000
-  },
-  {
-    _id: ObjectId('672f99c597509d5920c73bfa'),
-    flight_id: 'SG303',
-    airline: 'SpiceJet',
-    source: 'Bangalore',
-    destination: 'Hyderabad',
-    seats_available: 120,
-    price: 3500
-  }
-]
-flight> db.flights.find().skip(1).sort({ price: -1 }).limit(2)
-[
-  {
-    _id: ObjectId('672f99c597509d5920c73bf9'),
-    flight_id: '6E202',
-    airline: 'Indigo',
-    source: 'Mumbai',
-    destination: 'Chennai',
-    seats_available: 150,
-    price: 4000
-  },
-  {
-    _id: ObjectId('672f99c597509d5920c73bfa'),
-    flight_id: 'SG303',
-    airline: 'SpiceJet',
-    source: 'Bangalore',
-    destination: 'Hyderabad',
-    seats_available: 120,
-    price: 3500
-  }
-]
-flight> db.flights.find()
-[
-  {
-    _id: ObjectId('672f99c597509d5920c73bf8'),
-    flight_id: 'AI101',
-    airline: 'Air India',
-    source: 'Pune',
-    destination: 'Delhi',
-    seats_available: 100,
-    price: 5000
-  },
-  {
-    _id: ObjectId('672f99c597509d5920c73bf9'),
-    flight_id: '6E202',
-    airline: 'Indigo',
-    source: 'Mumbai',
-    destination: 'Chennai',
-    seats_available: 150,
-    price: 4000
-  },
-  {
-    _id: ObjectId('672f99c597509d5920c73bfa'),
-    flight_id: 'SG303',
-    airline: 'SpiceJet',
-    source: 'Bangalore',
-    destination: 'Hyderabad',
-    seats_available: 120,
-    price: 3500
-  }
-]
+
+# View all documents in the 'books' collection
+> db.books.find()
+{ "_id": ObjectId("..."), "title": "The Great Gatsby", "author": "F. Scott Fitzgerald", "year": 1925, "genres": ["Classic", "Fiction"], "available": true }
+{ "_id": ObjectId("..."), "title": "1984", "author": "George Orwell", "year": 1949, "genres": ["Dystopian", "Political Fiction"], "available": false }
+{ "_id": ObjectId("..."), "title": "To Kill a Mockingbird", "author": "Harper Lee", "year": 1960, "genres": ["Classic", "Social Issues"], "available": true }
+{ "_id": ObjectId("..."), "title": "The Catcher in the Rye", "author": "J.D. Salinger", "year": 1951, "genres": ["Classic", "Fiction"], "available": false }
+{ "_id": ObjectId("..."), "title": "Moby-Dick", "author": "Herman Melville", "year": 1851, "genres": ["Adventure", "Classic"], "available": true }
+
+# b) $where queries
+
+> db.books.find({ $where: "this.year < 1950" })
+{ "_id": ObjectId("..."), "title": "The Great Gatsby", "year": 1925 }
+{ "_id": ObjectId("..."), "title": "1984", "year": 1949 }
+{ "_id": ObjectId("..."), "title": "Moby-Dick", "year": 1851 }
+
+> db.books.find({ $where: "this.title.length > 15" })
+{ "_id": ObjectId("..."), "title": "To Kill a Mockingbird" }
+
+# d) Cursors (Limit, Skip, Sort)
+
+> db.books.find().limit(3)
+{ "_id": ObjectId("..."), "title": "The Great Gatsby" }
+{ "_id": ObjectId("..."), "title": "1984" }
+{ "_id": ObjectId("..."), "title": "To Kill a Mockingbird" }
+
+> db.books.find().skip(2)
+{ "_id": ObjectId("..."), "title": "To Kill a Mockingbird" }
+{ "_id": ObjectId("..."), "title": "The Catcher in the Rye" }
+{ "_id": ObjectId("..."), "title": "Moby-Dick" }
+
+> db.books.find().sort({ "year": -1 })
+{ "_id": ObjectId("..."), "title": "To Kill a Mockingbird", "year": 1960 }
+{ "_id": ObjectId("..."), "title": "The Catcher in the Rye", "year": 1951 }
+{ "_id": ObjectId("..."), "title": "1984", "year": 1949 }
+
+> db.books.find({ "available": true }).sort({ "year": -1 }).limit(2)
+{ "_id": ObjectId("..."), "title": "To Kill a Mockingbird" }
+{ "_id": ObjectId("..."), "title": "The Great Gatsby" }
+
+> db.books.find({ $and: [{ "available": true }, { "year": { $lt: 1960 } }] })
+{ "_id": ObjectId("..."), "title": "Moby-Dick", "available": true }
+{ "_id": ObjectId("..."), "title": "The Great Gatsby", "available": true }
