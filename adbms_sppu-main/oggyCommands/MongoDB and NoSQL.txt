@@ -1,0 +1,70 @@
+MongoDB and NoSQL:
+What is MongoDB?
+
+MongoDB is a NoSQL, document-oriented database that stores data in a flexible, JSON-like format (BSON). Unlike relational databases, it allows for schema-less data, meaning fields can vary from document to document, making it scalable and ideal for handling large amounts of unstructured data.
+What is a NoSQL Database?
+
+A NoSQL (Not Only SQL) database is a type of database that does not use the traditional relational model. NoSQL databases are designed for scalability, flexibility, and performance. They can store and retrieve data in various formats like key-value pairs, wide-column stores, graph databases, and document stores. Examples include MongoDB, Cassandra, and Redis.
+What is a Document?
+
+In MongoDB, a document is a set of key-value pairs (similar to a row in a relational database). It is a JSON-like object that can contain nested data structures like arrays or other documents. Documents are stored in collections.
+What is the Difference Between MySQL and MongoDB?
+
+Data Structure: MySQL is a relational database that uses tables with rows and columns, while MongoDB is a document-based NoSQL database that stores data as JSON-like documents.
+Schema: MySQL has a fixed schema, meaning the structure of data must be predefined. MongoDB has a flexible, schema-less structure, allowing documents to have different fields.
+Scalability: MongoDB is designed to scale horizontally across multiple servers, while MySQL is vertically scalable.
+Transactions: MySQL supports ACID transactions, whereas MongoDB's support for transactions is more limited but has been improving in recent versions.
+Is Foreign Key Possible in MongoDB?
+
+No, MongoDB does not support foreign keys in the way relational databases like MySQL do. Instead, you can implement relationships using references (manual joins) or embedding documents within other documents.
+List More Open-source Database Systems Other Than MySQL and MongoDB:
+
+PostgreSQL
+SQLite
+Cassandra
+CouchDB
+Redis
+MariaDB
+Neo4j (Graph database)
+Apache HBase
+Apache Drill
+MapReduce and Aggregation in MongoDB:
+What is MapReduce Operation?
+
+MapReduce is a programming model used for processing large datasets with a distributed algorithm. It has two stages:
+Map: The data is divided into chunks, and a function is applied to each chunk to transform the data.
+Reduce: The transformed data is aggregated or reduced to produce the final result.
+In MongoDB, MapReduce is used for performing complex aggregation tasks.
+What is the Use of the Map Function?
+
+The Map function is used to process individual pieces of data, transforming them into a more useful form. It generates a key-value pair for each input document.
+What is the Use of the Reduce Function?
+
+The Reduce function aggregates all values that share the same key, performing operations like summing or averaging them. It is used to combine the results from the Map stage into a single output.
+Which Method is Used for Aggregation?
+
+In MongoDB, the aggregate() method is used for aggregation operations. It processes data through a pipeline of stages, allowing for transformations like filtering, grouping, sorting, and projecting data.
+Which Method is Used for Indexing?
+
+The createIndex() method is used to create indexes in MongoDB. Indexes help to improve query performance by allowing efficient searching of documents.
+Use of ensureIndex Method:
+
+ensureIndex() is an older method in MongoDB that was used to create indexes. It is now deprecated in favor of createIndex(). The method ensures that the index is created, or it will not modify existing indexes.
+Database Schemas:
+What is a Database Schema?
+
+A database schema is the structure that defines how the data is organized in a database. It includes tables, fields, relationships, views, and other elements, essentially defining the layout of the database.
+What is Star Schema?
+
+The Star Schema is a type of database schema used in data warehousing, where data is organized into fact and dimension tables. The fact table is at the center, and dimension tables are connected to it. The star schema is simple and efficient for querying large datasets.
+What is Snowflake Schema?
+
+The Snowflake Schema is a more normalized version of the star schema. In this schema, dimension tables are normalized into multiple related tables. This reduces redundancy but increases the complexity of queries compared to the star schema.
+What is the Difference Between Star and Snowflake Schema?
+
+Star Schema: Simple structure with denormalized dimension tables. Faster for querying as there are fewer joins.
+Snowflake Schema: More complex structure with normalized dimension tables. It reduces redundancy but can be slower to query due to more joins.
+What Do You Mean by Dimension and Fact Tables?
+
+Dimension Table: These tables store descriptive, categorical information (e.g., customers, products, time) that can be used to slice and filter data.
+Fact Table: These tables store quantitative data, typically numeric, and represent transactional or business event data (e.g., sales, revenue, quantities). Fact tables usually have foreign keys to dimension tables.
