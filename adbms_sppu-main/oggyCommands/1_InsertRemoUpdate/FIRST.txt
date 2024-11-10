@@ -1,108 +1,140 @@
-# 1. Start MongoDB service
-sudo service mongod start
+For mongosh info see: https://www.mongodb.com/docs/mongodb-shell/
 
-# 2. Open MongoDB shell
-mongosh
+------
+   The server generated these startup warnings when booting
+   2024-11-10T10:11:51.036+05:30: Access control is not enabled for the database. Read and write access to data and configuration is unrestricted
+------
 
-# 3. Create a new database named "sportsDB"
-> use sportsDB
+test> use sportsDB
 switched to db sportsDB
-
-# 4. Create a collection named "players" and insert a single document
-> db.players.insertOne({ name: "Virat Kohli", age: 35, sport: "Cricket", team: "India", rank: 1 })
+sportsDB> db.players.insertOne({ name: "Virat Kohli", age: 35, sport: "Cricket", team: "India", rank: 1 })
 {
   acknowledged: true,
-  insertedId: ObjectId("653745e8e792c3f4c7e1b1a1")
+  insertedId: ObjectId('673047632ac27ffe3586b01d')
 }
-
-# 5. View all documents in the "players" collection
-> db.players.find().pretty()
-{
-  "_id": ObjectId("653745e8e792c3f4c7e1b1a1"),
-  "name": "Virat Kohli",
-  "age": 35,
-  "sport": "Cricket",
-  "team": "India",
-  "rank": 1
-}
-
-# 6. Batch insert multiple documents with validation
-> db.players.insertMany([
-  { name: "Lionel Messi", age: 36, sport: "Football", team: "Inter Miami", rank: 1 },
-  { name: "Serena Williams", age: 42, sport: "Tennis", team: "USA", rank: 2 },
-  { name: "LeBron James", age: 39, sport: "Basketball", team: "Lakers", rank: 3 }
-])
+sportsDB> db.players.find()
+[
+  {
+    _id: ObjectId('673047632ac27ffe3586b01d'),
+    name: 'Virat Kohli',
+    age: 35,
+    sport: 'Cricket',
+    team: 'India',
+    rank: 1
+  }
+]
+sportsDB> db.players.insertMany([
+... {name: "messi" , age:36, sport:"football" ,team : "Inter miami" , rank : 1},
+... {name: "serema" , age:33, sport:"tennis" ,team : "usa" , rank : 2},
+... ])
 {
   acknowledged: true,
-  insertedIds: [
-    ObjectId("653745e8e792c3f4c7e1b1a2"),
-    ObjectId("653745e8e792c3f4c7e1b1a3"),
-    ObjectId("653745e8e792c3f4c7e1b1a4")
-  ]
+  insertedIds: {
+    '0': ObjectId('673047e62ac27ffe3586b01e'),
+    '1': ObjectId('673047e62ac27ffe3586b01f')
+  }
 }
-
-# 7. View the updated "players" collection
-> db.players.find().pretty()
-
-# 8. Remove a document where the name is "Serena Williams"
-> db.players.deleteOne({ name: "Serena Williams" })
-{ acknowledged: true, deletedCount: 1 }
-
-# 9. View the updated "players" collection
-> db.players.find().pretty()
-
-# 10. Replace a document (document replacement)
-> db.players.replaceOne(
-  { name: "LeBron James" },
-  { name: "LeBron James", age: 40, sport: "Basketball", team: "Lakers", rank: 2 }
-)
+sportsDB> db.players.find().pretty()
+[
+  {
+    _id: ObjectId('673047632ac27ffe3586b01d'),
+    name: 'Virat Kohli',
+    age: 35,
+    sport: 'Cricket',
+    team: 'India',
+    rank: 1
+  },
+  {
+    _id: ObjectId('673047e62ac27ffe3586b01e'),
+    name: 'messi',
+    age: 36,
+    sport: 'football',
+    team: 'Inter miami',
+    rank: 1
+  },
+  {
+    _id: ObjectId('673047e62ac27ffe3586b01f'),
+    name: 'serema',
+    age: 33,
+    sport: 'tennis',
+    team: 'usa',
+    rank: 2
+  }
+]
+sportsDB> db.players.deleteOne({ name: "Serena Williams" })
+{ acknowledged: true, deletedCount: 0 }
+sportsDB> db.players.replaceOne(
+...   { name: "LeBron James" },
+...   { name: "LeBron James", age: 40, sport: "Basketball", team: "Lakers", rank: 2 }
+... )
 {
   acknowledged: true,
-  matchedCount: 1,
-  modifiedCount: 1
-}
-
-# 11. View the updated "players" collection
-> db.players.find().pretty()
-
-# 12. Update a document using modifiers ($set)
-> db.players.updateOne({ name: "Virat Kohli" }, { $set: { rank: 2 } })
-{
-  acknowledged: true,
-  matchedCount: 1,
-  modifiedCount: 1
-}
-
-# 13. View the updated "players" collection
-> db.players.find().pretty()
-
-# 14. Upsert a document (update if exists, insert if not)
-> db.players.updateOne(
-  { name: "Cristiano Ronaldo" },
-  { $set: { age: 38, sport: "Football", team: "Al-Nassr", rank: 1 } },
-  { upsert: true }
-)
-{
-  acknowledged: true,
+  insertedId: null,
   matchedCount: 0,
   modifiedCount: 0,
-  upsertedId: ObjectId("653745e8e792c3f4c7e1b1a5")
+  upsertedCount: 0
 }
-
-# 15. View the updated "players" collection
-> db.players.find().pretty()
-
-# 16. Update multiple documents (increase age by 1 for all players)
-> db.players.updateMany({}, { $inc: { age: 1 } })
+sportsDB> db.players.updateOne({ name: "Virat Kohli" }, { $set: { rank: 2 } })
 {
   acknowledged: true,
-  matchedCount: 4,
-  modifiedCount: 4
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
 }
-
-# 17. View the updated "players" collection
-> db.players.find().pretty()
-
-# 18. Stop MongoDB service
-> exit
-sudo service mongod stop
+sportsDB> db.players.updateOne(
+...   { name: "Cristiano Ronaldo" },
+...   { $set: { age: 38, sport: "Football", team: "Al-Nassr", rank: 1 } },
+...   { upsert: true }
+... )
+{
+  acknowledged: true,
+  insertedId: ObjectId('67304815ed8d76d53b25cd80'),
+  matchedCount: 0,
+  modifiedCount: 0,
+  upsertedCount: 1
+}
+sportsDB> db.players.updateMany({}, { $inc: { age: 1 } })
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 4,
+  modifiedCount: 4,
+  upsertedCount: 0
+}
+sportsDB> db.players.find().pretty()
+[
+  {
+    _id: ObjectId('673047632ac27ffe3586b01d'),
+    name: 'Virat Kohli',
+    age: 36,
+    sport: 'Cricket',
+    team: 'India',
+    rank: 2
+  },
+  {
+    _id: ObjectId('673047e62ac27ffe3586b01e'),
+    name: 'messi',
+    age: 37,
+    sport: 'football',
+    team: 'Inter miami',
+    rank: 1
+  },
+  {
+    _id: ObjectId('673047e62ac27ffe3586b01f'),
+    name: 'serema',
+    age: 34,
+    sport: 'tennis',
+    team: 'usa',
+    rank: 2
+  },
+  {
+    _id: ObjectId('67304815ed8d76d53b25cd80'),
+    name: 'Cristiano Ronaldo',
+    age: 39,
+    rank: 1,
+    sport: 'Football',
+    team: 'Al-Nassr'
+  }
+]
+sportsDB>
