@@ -1,0 +1,131 @@
+# Start MongoDB service
+sudo systemctl start mongod
+
+# Open MongoDB shell
+mongosh
+
+# Step 1: Create a database named 'companyDB'
+use companyDB
+
+# Step 2: Create a collection named 'employees'
+db.createCollection("employees")
+
+# Step 3: Insert sample data into the 'employees' collection
+db.employees.insertMany([
+    { "empId": 1, "name": "Alice", "department": "HR", "salary": 50000, "status": "Active", "age": 30, "joinDate": ISODate("2022-01-10"), "skills": ["Recruitment", "Onboarding"] },
+    { "empId": 2, "name": "Bob", "department": "Finance", "salary": 60000, "status": "Active", "age": 45, "joinDate": ISODate("2021-05-20"), "skills": ["Accounting", "Tax"] },
+    { "empId": 3, "name": "Charlie", "department": "HR", "salary": 55000, "status": "Inactive", "age": 28, "joinDate": ISODate("2020-11-15"), "skills": ["Payroll", "Employee Relations"] },
+    { "empId": 4, "name": "David", "department": "IT", "salary": 70000, "status": "Active", "age": 35, "joinDate": ISODate("2022-08-01"), "skills": ["Development", "DevOps"] },
+    { "empId": 5, "name": "Eve", "department": "Finance", "salary": 65000, "status": "Inactive", "age": 40, "joinDate": ISODate("2021-02-25"), "skills": ["Audit", "Budgeting"] }
+])
+
+# Step 4: Aggregation Framework
+
+## 1. Aggregation - Calculate total salary by department
+db.employees.aggregate([
+    { $group: { _id: "$department", totalSalary: { $sum: "$salary" } } }
+])
+
+## 2. Aggregation - Count number of active employees
+db.employees.aggregate([
+    { $match: { "status": "Active" } },
+    { $count: "activeEmployees" }
+])
+
+## 3. Aggregation - Find average salary of active employees in each department
+db.employees.aggregate([
+    { $match: { "status": "Active" } },
+    { $group: { _id: "$department", avgSalary: { $avg: "$salary" } } }
+])
+
+## 4. Aggregation - List departments with more than one inactive employee
+db.employees.aggregate([
+    { $match: { "status": "Inactive" } },
+    { $group: { _id: "$department", inactiveCount: { $sum: 1 } } },
+    { $match: { inactiveCount: { $gt: 1 } } }
+])
+
+## 5. Aggregation - Calculate average age of employees by department
+db.employees.aggregate([
+    { $group: { _id: "$department", avgAge: { $avg: "$age" } } }
+])
+
+# Step 5: Map-Reduce Implementation
+
+## Define a map function to emit salary by department
+var mapFunction = function() { emit(this.department, this.salary); };
+
+## Define a reduce function to sum the salaries
+var reduceFunction = function(key, values) { return Array.sum(values); };
+
+## Execute map-reduce to calculate total salaries by department
+db.employees.mapReduce(mapFunction, reduceFunction, { out: "totalDepartmentSalary" })
+
+# View map-reduce results
+db.totalDepartmentSalary.find()
+
+# Step 6: Indexing
+
+## 1. Single-field index on 'department'
+db.employees.createIndex({ "department": 1 })
+
+## 2. Single-field index on 'status' for filtering active/inactive employees
+db.employees.createIndex({ "status": 1 })
+
+## 3. Compound index on 'department' and 'status' to optimize queries using both fields
+db.employees.createIndex({ "department": 1, "status": 1 })
+
+## 4. Compound index on 'department' and 'salary' for salary-related queries per department
+db.employees.createIndex({ "department": 1, "salary": -1 })  # Descending order on salary
+
+## 5. Unique index on 'empId' to prevent duplicate employee entries
+db.employees.createIndex({ "empId": 1 }, { unique: true })
+
+## 6. Text index on 'name' to enable text search (for searching employee names)
+db.employees.createIndex({ "name": "text" })
+
+## 7. Multi-key index on 'skills' (supports arrays of values)
+db.employees.createIndex({ "skills": 1 })
+
+## 8. Partial index on 'age' for employees over 30 years old
+db.employees.createIndex({ "age": 1 }, { partialFilterExpression: { "age": { $gt: 30 } } })
+
+## 9. TTL (Time-to-Live) index on 'joinDate' for automatic document expiration (1 year duration)
+db.employees.createIndex({ "joinDate": 1 }, { expireAfterSeconds: 31536000 })
+
+## 10. Sparse index on 'salary' for documents where 'salary' field exists
+db.employees.createIndex({ "salary": 1 }, { sparse: true })
+
+# Step 7: Query Performance Analysis with and without Indexes
+
+## Query without index (Slow performance for large datasets)
+db.employees.find({ "department": "Finance", "status": "Active" }).explain("executionStats")
+
+## Query using compound index (Faster performance)
+db.employees.find({ "department": "Finance", "status": "Active" }).explain("executionStats")
+
+## Text search query using text index
+db.employees.find({ $text: { $search: "Alice" } })
+
+## Query using partial index (employees aged above 30)
+db.employees.find({ "age": { $gt: 30 } }).explain("executionStats")
+
+## Query using multi-key index (employees with 'DevOps' skill)
+db.employees.find({ "skills": "DevOps" }).explain("executionStats")
+
+# Step 8: Drop Indexes
+
+## Drop the single-field index on 'department'
+db.employees.dropIndex({ "department": 1 })
+
+## Drop the compound index on 'department' and 'status'
+db.employees.dropIndex({ "department": 1, "status": 1 })
+
+## Drop the text index on 'name'
+db.employees.dropIndex({ "name": "text" })
+
+## Drop all indexes except the default _id index
+db.employees.dropIndexes()
+
+# View current indexes
+db.employees.getIndexes()
